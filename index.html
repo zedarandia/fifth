@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5th</title>
+  <style>
+    .protected-content {
+      display: none;
+    }
+	
+	body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #add8e6; /* Baby blue color */
+}
+
+.container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+input {
+  width: 200px;
+  padding: 8px; 
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+#message {
+  margin-top: 10px;
+  font-weight: bold;
+}
+  </style>
+
+  <script>
+    // Hardcoded user credentials
+    const validUsers = [
+      { username: 'Kate', password: '122023' }
+    ];
+
+    function loginUser(username, password) {
+      // Check if the username and password are valid
+      const user = validUsers.find(u => u.username === username && u.password === password);
+      if (!user) {
+        return { error: 'Invalid username or password' };
+      }
+
+      // Generate a JWT token
+      const token = generateToken(user.username);
+      return { token, redirectUrl: 'cyndrel2.html' };
+    }
+
+    function generateToken(username) {
+      return `jwt_token_for_${username}`;
+    }
+
+    function verifyToken(token) {
+      // In a real application, you would use a JWT library to verify the token
+      const username = token.split('_')[3];
+      const user = validUsers.find(u => u.username === username);
+      if (!user) {
+        return { error: 'Invalid token' };
+      }
+      return { message: 'This is a protected route!' };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginForm = document.getElementById('login-form');
+      const messageDiv = document.getElementById('message');
+      const protectedButton = document.getElementById('protected-button');
+
+      loginForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        const { token, redirectUrl, error } = loginUser(username, password);
+        if (token) {
+          localStorage.setItem('token', token);
+          messageDiv.textContent = 'Login successful!';
+          protectedButton.style.display = 'inline-block';
+          window.location.href = redirectUrl;
+        } else {
+          messageDiv.textContent = error;
+        }
+      });
+
+      protectedButton.addEventListener('click', () => {
+        const token = localStorage.getItem('token');
+        const { message, error } = verifyToken(token);
+        if (message) {
+          messageDiv.textContent = message;
+        } else {
+          messageDiv.textContent = error;
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>FOR UR EYES ONLY !!</h2>
+    <form id="login-form">
+      <input type="text" id="username" placeholder="Username" value="Kate" required>
+      <input type="password" id="password" placeholder="Password" value="122023" required>
+      <button type="submit">Login</button>
+    </form>
+    <button id="protected-button" style="display: none;">Access Protected Route</button>
+    <div id="message"></div>
+    <div class="protected-content"></div>
+  </div>
+</body>
+</html>
